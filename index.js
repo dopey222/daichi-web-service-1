@@ -11,7 +11,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());               // ← 2. ここで使う
+app.use(cors({
+  origin: '*', // 必要なら特定のドメインだけ許可にしてもOK
+  methods: ['GET', 'POST', 'OPTIONS'],
+}));
 
 // JSONを受け取れるようにする設定
 app.use(express.json());
@@ -21,7 +24,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// ===== ここから新しく追加 =====
+app.options('/api/ask', cors());
 
 // POSTリクエスト：/api/ask
 app.post('/api/ask', async (req, res) => {
