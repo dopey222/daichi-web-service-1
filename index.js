@@ -11,9 +11,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS設定を強化
 app.use(cors({
-  origin: '*', // 必要なら特定のドメインだけ許可にしてもOK
+  origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // JSONを受け取れるようにする設定
@@ -24,30 +26,30 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.options('/api/ask', cors());
+// **OPTIONSにも応答できるようにまとめて対応**
+app.options('*', cors());
 
 // POSTリクエスト：/api/ask
 app.post('/api/ask', async (req, res) => {
-  const { prompt } = req.body; // クライアントから送られてきたプロンプトを取得
+  const { prompt } = req.body;
 
   try {
     const response = await axios.post(
       'https://openrouter.ai/api/v1/chat/completions',
       {
-        model: 'gpt-3.5-turbo', // 使用するモデル
-        messages: [{ role: 'user', content: prompt }] // 質問内容
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }]
       },
       {
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-            'Referer':'https://daichi-frontend-1.vercel.app/', // あなたのアプリケーションのURL
-            'X-Title': 'Daichi Web Service', // 任意のアプリ名（適当に決めてOK）
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Referer': 'https://daichi-frontend-1.vercel.app/',
+          'X-Title': 'Daichi Web Service',
         }
       }
     );
 
-    // OpenAIからの返答をクライアントに返す
     res.json(response.data);
   } catch (error) {
     console.error('=== OpenAI API error ===');
@@ -59,10 +61,8 @@ app.post('/api/ask', async (req, res) => {
       console.error('Error Message:', error.message);
       res.status(500).json({ error: error.message });
     }
-  }  
+  }
 });
-
-// ===== ここまで追加 =====
 
 // サーバー起動
 app.listen(PORT, () => {
