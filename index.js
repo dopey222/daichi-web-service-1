@@ -26,8 +26,6 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// **OPTIONSにも応答できるようにまとめて対応**
-app.options('*', cors());
 
 // POSTリクエスト：/api/ask
 app.post('/api/ask', async (req, res) => {
